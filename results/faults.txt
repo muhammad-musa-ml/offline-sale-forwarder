@@ -1,0 +1,16 @@
+key    server  fault on (slow replies always on)   runs with a duplicate
+fresh  claim   none (slow replies only)            48/200
+fresh  claim   request lost, 10%                   43/200
+fresh  claim   reply lost, 30%                     199/200
+fresh  claim   process dies after a reply, 10%     173/200
+fresh  claim   second forwarder, probability 0.5   122/200
+stored lookup  none (slow replies only)            13/200
+stored lookup  request lost, 10%                   10/200
+stored lookup  reply lost, 30%                     13/200
+stored lookup  process dies after a reply, 10%     14/200
+stored lookup  second forwarder, probability 0.5   92/200
+stored claim   none (slow replies only)            0/200
+stored claim   request lost, 10%                   0/200
+stored claim   reply lost, 30%                     0/200
+stored claim   process dies after a reply, 10%     0/200
+stored claim   second forwarder, probability 0.5   0/200

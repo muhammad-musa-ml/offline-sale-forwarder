@@ -82,7 +82,7 @@ class PaymentServer:
     def charges_by_ref(self):
         """{ref: (number of charges, total cents)} for the audit."""
         rows = self.db.execute(
-            "SELECT ref, COUNT(*), SUM(amount_cents) FROM charges GROUP BY ref"
+            "SELECT ref, COUNT(*), SUM(amount_cents) FROM charges GROUP BY ref ORDER BY ref"
         ).fetchall()
         return {ref: (n, total) for ref, n, total in rows}
 

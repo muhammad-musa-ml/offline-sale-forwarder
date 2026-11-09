@@ -9,7 +9,7 @@
         {
           "seeds": "0-199",
           "runs_with_a_duplicate": 200,
-          "sales_charged_twice": 1299,
+          "sales_charged_more_than_once": 1299,
           "extra_dollars": 106820.01,
           "uncharged_sales": 0,
           "runs_not_drained": 0
@@ -17,7 +17,7 @@
         {
           "seeds": "200-399",
           "runs_with_a_duplicate": 200,
-          "sales_charged_twice": 1342,
+          "sales_charged_more_than_once": 1342,
           "extra_dollars": 116114.97,
           "uncharged_sales": 0,
           "runs_not_drained": 0
@@ -25,13 +25,13 @@
         {
           "seeds": "400-599",
           "runs_with_a_duplicate": 200,
-          "sales_charged_twice": 1336,
+          "sales_charged_more_than_once": 1336,
           "extra_dollars": 112643.09,
           "uncharged_sales": 0,
           "runs_not_drained": 0
         }
       ],
-      "per_run_sales_charged_twice": {
+      "per_run_sales_charged_more_than_once": {
         "min": 1,
         "median": 7.0,
         "max": 12
@@ -44,7 +44,7 @@
         {
           "seeds": "0-199",
           "runs_with_a_duplicate": 200,
-          "sales_charged_twice": 1299,
+          "sales_charged_more_than_once": 1299,
           "extra_dollars": 106820.01,
           "uncharged_sales": 0,
           "runs_not_drained": 0
@@ -52,7 +52,7 @@
         {
           "seeds": "200-399",
           "runs_with_a_duplicate": 200,
-          "sales_charged_twice": 1342,
+          "sales_charged_more_than_once": 1342,
           "extra_dollars": 116114.97,
           "uncharged_sales": 0,
           "runs_not_drained": 0
@@ -60,13 +60,13 @@
         {
           "seeds": "400-599",
           "runs_with_a_duplicate": 200,
-          "sales_charged_twice": 1336,
+          "sales_charged_more_than_once": 1336,
           "extra_dollars": 112643.09,
           "uncharged_sales": 0,
           "runs_not_drained": 0
         }
       ],
-      "per_run_sales_charged_twice": {
+      "per_run_sales_charged_more_than_once": {
         "min": 1,
         "median": 7.0,
         "max": 12
@@ -79,7 +79,7 @@
         {
           "seeds": "0-199",
           "runs_with_a_duplicate": 88,
-          "sales_charged_twice": 139,
+          "sales_charged_more_than_once": 139,
           "extra_dollars": 7798.78,
           "uncharged_sales": 0,
           "runs_not_drained": 0
@@ -87,7 +87,7 @@
         {
           "seeds": "200-399",
           "runs_with_a_duplicate": 96,
-          "sales_charged_twice": 169,
+          "sales_charged_more_than_once": 169,
           "extra_dollars": 8611.22,
           "uncharged_sales": 0,
           "runs_not_drained": 0
@@ -95,13 +95,13 @@
         {
           "seeds": "400-599",
           "runs_with_a_duplicate": 93,
-          "sales_charged_twice": 157,
+          "sales_charged_more_than_once": 157,
           "extra_dollars": 8898.42,
           "uncharged_sales": 0,
           "runs_not_drained": 0
         }
       ],
-      "per_run_sales_charged_twice": {
+      "per_run_sales_charged_more_than_once": {
         "min": 0,
         "median": 0.0,
         "max": 5
@@ -114,7 +114,7 @@
         {
           "seeds": "0-199",
           "runs_with_a_duplicate": 0,
-          "sales_charged_twice": 0,
+          "sales_charged_more_than_once": 0,
           "extra_dollars": 0.0,
           "uncharged_sales": 0,
           "runs_not_drained": 0
@@ -122,7 +122,7 @@
         {
           "seeds": "200-399",
           "runs_with_a_duplicate": 0,
-          "sales_charged_twice": 0,
+          "sales_charged_more_than_once": 0,
           "extra_dollars": 0.0,
           "uncharged_sales": 0,
           "runs_not_drained": 0
@@ -130,13 +130,13 @@
         {
           "seeds": "400-599",
           "runs_with_a_duplicate": 0,
-          "sales_charged_twice": 0,
+          "sales_charged_more_than_once": 0,
           "extra_dollars": 0.0,
           "uncharged_sales": 0,
           "runs_not_drained": 0
         }
       ],
-      "per_run_sales_charged_twice": {
+      "per_run_sales_charged_more_than_once": {
         "min": 0,
         "median": 0.0,
         "max": 0

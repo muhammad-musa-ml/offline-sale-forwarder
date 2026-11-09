@@ -1,0 +1,9 @@
+key=fresh server=claim seed=0: 3 of 12 sales charged more than once, 22924 cents extra
+first one: sale-004, 6211 cents
+  tick   32  register-1  sent key sale-004/try-1
+  tick   35  server      key sale-004/try-1: charged
+  tick   35  server      reply to key sale-004/try-1 lost
+  tick   42  register-1  no reply for sale-004/try-1, trying again
+  tick   44  register-1  sent key sale-004/try-2
+  tick   48  server      key sale-004/try-2: charged
+  tick   50  register-1  marked sent after charged

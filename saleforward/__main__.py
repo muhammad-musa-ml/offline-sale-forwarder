@@ -21,7 +21,7 @@ def run_table(seeds, blocks):
             per_block.append({
                 "seeds": f"{block * seeds}-{(block + 1) * seeds - 1}",
                 "runs_with_a_duplicate": sum(1 for r in results if r["duplicated"] > 0),
-                "sales_charged_twice": sum(r["duplicated"] for r in results),
+                "sales_charged_more_than_once": sum(r["duplicated"] for r in results),
                 "extra_dollars": round(sum(r["extra_cents"] for r in results) / 100, 2),
                 "uncharged_sales": sum(r["lost"] for r in results),
                 "runs_not_drained": sum(1 for r in results if not r["drained"]),
@@ -30,7 +30,7 @@ def run_table(seeds, blocks):
             "key": policy,
             "server": mode,
             "blocks": per_block,
-            "per_run_sales_charged_twice": {
+            "per_run_sales_charged_more_than_once": {
                 "min": min(per_run),
                 "median": statistics.median(per_run),
                 "max": max(per_run),
@@ -42,14 +42,14 @@ def run_table(seeds, blocks):
 def format_table(result):
     n = result["runs_per_block"]
     lines = [f"{n} runs per block, {result['sales_per_run']} sales per run"]
-    lines.append(f"{'key':<7}{'server':<8}{'runs with a duplicate, per block':<36}{'sales charged twice per run (min/median/max)':<48}{'extra dollars, per block'}")
+    lines.append(f"{'key':<7}{'server':<8}{'runs with a duplicate, per block':<36}{'sales charged more than once per run (min/median/max)':<58}{'extra dollars, per block'}")
     for row in result["setups"]:
         per_block = ", ".join(f"{b['runs_with_a_duplicate']}/{n}" for b in row["blocks"])
-        spread = row["per_run_sales_charged_twice"]
+        spread = row["per_run_sales_charged_more_than_once"]
         dollars = ", ".join(f"{b['extra_dollars']:.0f}" for b in row["blocks"])
         lines.append(
             f"{row['key']:<7}{row['server']:<8}{per_block:<36}"
-            f"{str(spread['min']) + '/' + str(spread['median']) + '/' + str(spread['max']):<48}{dollars}"
+            f"{str(spread['min']) + '/' + str(spread['median']) + '/' + str(spread['max']):<58}{dollars}"
         )
     return "\n".join(lines)
 
@@ -60,7 +60,7 @@ ONE_FAULT = [
     ("request lost, 10%", {"lose_request": 0.1}),
     ("reply lost, 30%", {"lose_reply": 0.3}),
     ("process dies after a reply, 10%", {"crash": 0.1}),
-    ("second forwarder, 50% of runs", {"second": 0.5}),
+    ("second forwarder, probability 0.5", {"second": 0.5}),
 ]
 
 
@@ -81,7 +81,7 @@ def run_one_fault(seeds):
 
 
 def format_one_fault(rows):
-    lines = [f"{'key':<7}{'server':<8}{'only this fault is on':<36}runs with a duplicate"]
+    lines = [f"{'key':<7}{'server':<8}{'fault on (slow replies always on)':<36}runs with a duplicate"]
     for row in rows:
         lines.append(f"{row['key']:<7}{row['server']:<8}{row['fault']:<36}{row['runs_with_a_duplicate']}/{row['runs']}")
     return "\n".join(lines)
@@ -95,16 +95,22 @@ def explain(policy, mode, seed, limit):
         if result["duplicated"] == 0:
             continue
         ref = result["duplicated_refs"][0]
-        print(f"key={policy} server={mode} seed={s}: {result['duplicated']} of {result['sales']} sales "
-              f"charged twice, {result['extra_cents']} cents extra")
-        print(f"first one: {ref}, {world.amounts[ref]} cents")
+        lines = [
+            f"key={policy} server={mode} seed={s}: {result['duplicated']} of {result['sales']} sales "
+            f"charged more than once, {result['extra_cents']} cents extra",
+            f"first one: {ref}, {world.amounts[ref]} cents",
+        ]
         for tick, who, event_ref, text in world.events:
             if event_ref == ref:
-                print(f"  tick {tick:>4}  {who:<11} {text}")
-        return 0
-    print(f"key={policy} server={mode}: no sale charged twice in "
-          f"{'seed ' + str(seed) if seed is not None else 'seeds 0-' + str(limit - 1)}")
-    return 0
+                lines.append(f"  tick {tick:>4}  {who:<11} {text}")
+        return "\n".join(lines)
+    return (f"key={policy} server={mode}: no sale charged more than once in "
+            f"{'seed ' + str(seed) if seed is not None else 'seeds 0-' + str(limit - 1)}")
+
+
+def write_text(path, text):
+    with open(path, "w", encoding="utf-8", newline="\n") as f:
+        f.write(text + "\n")
 
 
 def main(argv=None):
@@ -116,11 +122,13 @@ def main(argv=None):
     t.add_argument("--out", help="also write the result as JSON to this path")
     f = sub.add_parser("faults", help="turn the faults on one at a time")
     f.add_argument("--seeds", type=int, default=200)
-    e = sub.add_parser("explain", help="print the history of one sale that was charged twice")
+    f.add_argument("--out", help="also write the table as text to this path")
+    e = sub.add_parser("explain", help="print the history of one sale that was charged more than once")
     e.add_argument("--key", choices=POLICIES, default="fresh")
     e.add_argument("--server", choices=MODES, default="claim")
-    e.add_argument("--seed", type=int, help="default: the first seed that charges a sale twice")
+    e.add_argument("--seed", type=int, help="default: the first seed that charges a sale more than once")
     e.add_argument("--limit", type=int, default=1000, help="how many seeds to try when no seed is given")
+    e.add_argument("--out", help="also write the text to this path")
     args = parser.parse_args(argv)
     if args.command == "table":
         result = run_table(args.seeds, args.blocks)
@@ -131,9 +139,13 @@ def main(argv=None):
                 f.write("\n")
         return 0
     if args.command == "faults":
-        print(format_one_fault(run_one_fault(args.seeds)))
-        return 0
-    return explain(args.key, args.server, args.seed, args.limit)
+        text = format_one_fault(run_one_fault(args.seeds))
+    else:
+        text = explain(args.key, args.server, args.seed, args.limit)
+    print(text)
+    if args.out:
+        write_text(args.out, text)
+    return 0
 
 
 if __name__ == "__main__":

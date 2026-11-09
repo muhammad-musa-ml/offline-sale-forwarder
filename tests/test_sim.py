@@ -29,17 +29,25 @@ class Scripted(World):
 MODES = ("lookup", "claim")
 
 
+def _fired(world, text):
+    return any(text in event[3] for event in world.events)
+
+
 @pytest.mark.parametrize("mode", MODES)
 @pytest.mark.parametrize("seed", range(5))
 def test_a_lost_reply_does_not_duplicate_a_charge_when_the_key_is_stored(mode, seed):
-    result = Scripted("stored", mode, seed, lose_reply_at=(1,)).run()
+    world = Scripted("stored", mode, seed, lose_reply_at=(1,))
+    result = world.run()
+    assert _fired(world, "reply to key sale-000 lost")
     assert result["drained"] and result["duplicated"] == 0 and result["lost"] == 0
 
 
 @pytest.mark.parametrize("mode", MODES)
 @pytest.mark.parametrize("seed", range(5))
 def test_a_lost_reply_duplicates_a_charge_when_each_try_makes_a_new_key(mode, seed):
-    result = Scripted("fresh", mode, seed, lose_reply_at=(1,)).run()
+    world = Scripted("fresh", mode, seed, lose_reply_at=(1,))
+    result = world.run()
+    assert _fired(world, "reply to key sale-000/try-1 lost")
     assert result["drained"] and result["duplicated"] == 1 and result["lost"] == 0
     assert result["extra_cents"] > 0
 
@@ -47,20 +55,43 @@ def test_a_lost_reply_duplicates_a_charge_when_each_try_makes_a_new_key(mode, se
 @pytest.mark.parametrize("policy", ("fresh", "stored"))
 @pytest.mark.parametrize("mode", MODES)
 def test_a_lost_request_is_sent_again_and_charged_once(policy, mode):
-    result = Scripted(policy, mode, lose_request_at=(1,)).run()
+    world = Scripted(policy, mode, lose_request_at=(1,))
+    result = world.run()
+    assert _fired(world, "lost before the server")
+    assert world.sends >= 4
     assert result["drained"] and result["lost"] == 0 and result["duplicated"] == 0
 
 
 @pytest.mark.parametrize("mode", MODES)
 def test_a_crash_after_the_reply_does_not_duplicate_a_charge_when_the_key_is_stored(mode):
-    result = Scripted("stored", mode, crash_at=(1,)).run()
+    world = Scripted("stored", mode, crash_at=(1,))
+    result = world.run()
+    assert _fired(world, "register process died")
     assert result["drained"] and result["duplicated"] == 0 and result["lost"] == 0
 
 
 @pytest.mark.parametrize("mode", MODES)
 def test_a_crash_after_the_reply_duplicates_a_charge_when_each_try_makes_a_new_key(mode):
-    result = Scripted("fresh", mode, crash_at=(1,)).run()
+    world = Scripted("fresh", mode, crash_at=(1,))
+    result = world.run()
+    assert _fired(world, "register process died")
     assert result["drained"] and result["duplicated"] == 1 and result["lost"] == 0
+
+
+def test_fresh_keys_are_numbered_per_sale():
+    world = World(0, "fresh", "claim")
+    assert [world.fresh_key("a"), world.fresh_key("a"), world.fresh_key("b")] == [
+        "a/try-1",
+        "a/try-2",
+        "b/try-1",
+    ]
+
+
+def test_a_run_that_is_cut_short_reports_uncharged_sales_and_an_undrained_journal(monkeypatch):
+    monkeypatch.setattr("saleforward.sim.MAX_TICKS", 5)
+    result = World(0, "stored", "claim").run()
+    assert result["lost"] > 0
+    assert not result["drained"]
 
 
 def test_the_same_seed_gives_the_same_run():
@@ -82,7 +113,7 @@ def test_every_run_drains_and_no_sale_goes_uncharged(policy, mode):
         assert result["lost"] == 0
 
 
-def test_stored_key_with_a_claiming_server_never_charges_a_sale_twice():
+def test_stored_key_with_a_claiming_server_never_charges_a_sale_more_than_once():
     assert all(r["duplicated"] == 0 for r in _many("stored", "claim"))
 
 

@@ -10,11 +10,24 @@ from saleforward.journal import Journal
 ROOT = Path(__file__).resolve().parent.parent
 
 
-def test_oldest_sale_comes_first():
+def test_oldest_sale_comes_first_whatever_its_id_or_amount():
+    j = Journal(":memory:")
+    j.record("b", 700)
+    j.record("a", 500)
+    assert j.next_pending() == ("b", 700)
+
+
+def test_a_file_journal_uses_wal_and_full_sync(tmp_path):
+    j = Journal(str(tmp_path / "register.db"))
+    assert j.db.execute("PRAGMA journal_mode").fetchone()[0] == "wal"
+    assert j.db.execute("PRAGMA synchronous").fetchone()[0] == 2
+
+
+def test_a_sale_can_only_be_pending_or_sent():
     j = Journal(":memory:")
     j.record("a", 500)
-    j.record("b", 700)
-    assert j.next_pending() == ("a", 500)
+    with pytest.raises(sqlite3.IntegrityError):
+        j.db.execute("UPDATE sales SET state = 'lost' WHERE sale_id = 'a'")
 
 
 def test_sent_sale_is_no_longer_pending():

@@ -40,15 +40,15 @@ class World:
         self.tasks = []
         self.events = []
         self.tick = 0
-        self._keys = 0
+        self._tries = {}
         self._forwarders = 0
 
     def log(self, who, ref, text):
         self.events.append((self.tick, who, ref, text))
 
     def fresh_key(self, sale_id):
-        self._keys += 1
-        return f"{sale_id}/try-{self._keys}"
+        self._tries[sale_id] = self._tries.get(sale_id, 0) + 1
+        return f"{sale_id}/try-{self._tries[sale_id]}"
 
     def crash_after_reply(self):
         return self.faults.random() < self.p_crash
